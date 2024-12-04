@@ -1,0 +1,85 @@
+name: 'Remote execute command'
+description: 'Execute a stack command on a remote host'
+inputs:
+  git-repo:
+    description: The git repo to clone
+    required: true
+  git-ref:
+    description: Commit ref to check out (typically a hash)
+    required: true
+  command:
+    description: The stack command to execute ("plan" or "deploy")
+    required: true
+  project:
+    description: 'Project name as specified in the deploy.yml configuration'
+    required: true
+  ssh-user:
+    description: 'Username to connect to the remote host as'
+    required: false
+    default: ec2-user
+  ssh-host:
+    description: 'Hostname of the remote machine to SSH into'
+    required: false
+    default: stack.warpcast.com
+  ssh-key:
+    description: 'Private SSH key to use to connect to the remote host'
+    required: true
+  release-id:
+    description: 'Name of the release (typically a date and commit hash)'
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-key }}
+
+    - name: Set release ID
+      id: set-release
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.release-id }}" ]; then
+          release="$(date -u +"%Y-%m-%dT%H-%M-%S-%3NZ")-$(git rev-parse --short HEAD)"
+        else
+          release="${{ inputs.release-id }}"
+        fi
+        echo "release = $release"
+        echo "release=$release" >> "$GITHUB_OUTPUT"
+
+    - name: Execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
+      shell: bash
+      env:
+        STACK_COMMAND: ${{ inputs.command }} # Sanitizes input to a string
+      run: |
+        # -4 // Force SSH to connect via IPV4
+        # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
+        # -A // Forward credentials to SSH agent (allows SSHing to deployed hosts)
+        # -o BatchMode=yes // Disable interactivity
+        # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
+        # -o StrictHostKeyChecking=no // Don't check against any known hosts
+        ssh -4 -T -A -o BatchMode=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
+        set -eux
+
+        mkdir -p stack-projects
+        cd stack-projects
+        rm -rf ${{ inputs.project }} # This will fail to remove any Terraform cache (since they are created with root user) which is exactly what we want, but cleans up everything else
+        mkdir -p ${{ inputs.project }}
+        cd ${{ inputs.project }}
+
+        # Hardcode known host keys for GitHub.
+        # Obtained by running: ssh-keyscan github.com | grep -v '^#'
+        cat - <<HOSTKEYS >> ~/.ssh/known_hosts
+        github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+        github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+        github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+        HOSTKEYS
+
+        git init
+        git remote add origin git@github.com:${{ inputs.git-repo }}
+        git fetch --no-tags --prune --depth=1 origin +${{ inputs.get-ref }}:refs/remotes/origin/main
+        git checkout --force -B main refs/remotes/origin/main
+
+        # Set CI=true to disable animations in Terraform CDK which bloat the logs
+        CI=true stack "$STACK_COMMAND" release=${{ steps.set-release.outputs.release }}
+        EOF
+        )"
