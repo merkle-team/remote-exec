@@ -7,6 +7,9 @@ inputs:
   git-ref:
     description: Commit ref to check out (typically a hash)
     required: true
+  docker-image:
+    description: Full path to Docker image to deploy
+    required: true
   command:
     description: The stack command to execute ("plan" or "deploy")
     required: true
@@ -50,6 +53,7 @@ runs:
       shell: bash
       env:
         STACK_COMMAND: ${{ inputs.command }} # Sanitizes input to a string
+        STACK_DOCKER_IMAGE: ${{ inputs.docker-image }} # Referenced by the deploy.yml
       run: |
         # -4 // Force SSH to connect via IPV4
         # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
