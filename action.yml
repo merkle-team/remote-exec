@@ -53,7 +53,6 @@ runs:
       shell: bash
       env:
         STACK_COMMAND: ${{ inputs.command }} # Sanitizes input to a string
-        STACK_DOCKER_IMAGE: ${{ inputs.docker-image }} # Referenced by the deploy.yml
       run: |
         # -4 // Force SSH to connect via IPV4
         # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
@@ -62,7 +61,7 @@ runs:
         # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
         ssh -4 -T -A -o BatchMode=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
-        set -eu
+        set -eux
 
         mkdir -p stack-projects
         cd stack-projects
@@ -85,6 +84,6 @@ runs:
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
         # Set --yes so that we don't prompt for input
-        env STACK_DOCKER_IMAGE="$STACK_DOCKER_IMAGE" CI=true stack "$STACK_COMMAND" --yes --release=${{ steps.set-release.outputs.release }}
+        env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack "$STACK_COMMAND" --yes --release=${{ steps.set-release.outputs.release }}
         EOF
         )"
