@@ -85,6 +85,6 @@ runs:
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
         # Set --yes so that we don't prompt for input
-        CI=true stack "$STACK_COMMAND" --yes --release=${{ steps.set-release.outputs.release }}
+        env STACK_DOCKER_IMAGE="$STACK_DOCKER_IMAGE" CI=true stack "$STACK_COMMAND" --yes --release=${{ steps.set-release.outputs.release }}
         EOF
         )"
