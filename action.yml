@@ -42,7 +42,7 @@ runs:
       shell: bash
       run: |
         if [ -z "${{ inputs.release-id }}" ]; then
-          release="$(date -u +"%Y-%m-%dT%H-%M-%S-%3NZ")-$(git rev-parse --short HEAD)"
+          release="$(date -u +"%Y-%m-%dT%H-%M-%S-%3NZ")-${{ inputs.git-ref }}"
         else
           release="${{ inputs.release-id }}"
         fi
