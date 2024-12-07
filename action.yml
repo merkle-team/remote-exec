@@ -62,7 +62,7 @@ runs:
         # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
         ssh -4 -T -A -o BatchMode=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
-        set -eux
+        set -eu
 
         mkdir -p stack-projects
         cd stack-projects
@@ -84,6 +84,6 @@ runs:
         git checkout --force -B main refs/remotes/origin/main
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
-        CI=true stack "$STACK_COMMAND" release=${{ steps.set-release.outputs.release }}
+        CI=true stack "$STACK_COMMAND" --release=${{ steps.set-release.outputs.release }}
         EOF
         )"
