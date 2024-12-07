@@ -84,6 +84,7 @@ runs:
         git checkout --force -B main refs/remotes/origin/main
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
-        CI=true stack "$STACK_COMMAND" --release=${{ steps.set-release.outputs.release }}
+        # Set --yes so that we don't prompt for input
+        CI=true stack "$STACK_COMMAND" --yes --release=${{ steps.set-release.outputs.release }}
         EOF
         )"
