@@ -7,6 +7,7 @@ Allows us to reuse this logic across all applications we deploy via [Stack](http
 ## Inputs
 - `git-repo` **(required)** GitHub repository to clone (e.g. `my-org/my-repo-name`)
 - `git-ref` **(required)** Commit ref to check out (typically a hash)
+- `docker-image` **(required)** Full URL to the Docker image to pull on deployed instances
 - `command` **(required)** one of `deploy` or `plan`
 - `project` **(required)** the project name as specified in the `deploy.yml` configuration
 - `ssh-key` **(required)** private SSH key to use to connect to `ssh-user`@`ssh-host`
@@ -26,7 +27,8 @@ jobs:
         with:
           git-repo: ${{ github.repository }}
           git-ref: ${{ github.sha }}
-          command: make deploy # Assumes your repo has a Makefile with this defined
+          docker-image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-organization/my-repository:${{ github.sha }} # ECR repo
+          command: deploy
           project: 'my-project'
           ssh-key: ${{ secrets.STACK_DEPLOY_SSH_PRIVATE_KEY }}
 ```
