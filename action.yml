@@ -51,8 +51,6 @@ runs:
 
     - name: Execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
       shell: bash
-      env:
-        STACK_COMMAND: ${{ inputs.command }} # Sanitizes input to a string
       run: |
         # -4 // Force SSH to connect via IPV4
         # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
@@ -84,6 +82,6 @@ runs:
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
         # Set --yes so that we don't prompt for input
-        env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack $STACK_COMMAND --yes --release=${{ steps.set-release.outputs.release }}
+        env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}
         EOF
         )"
