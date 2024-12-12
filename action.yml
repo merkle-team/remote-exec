@@ -23,7 +23,7 @@ inputs:
   ssh-host:
     description: 'Hostname of the remote machine to SSH into'
     required: false
-    default: stack.warpcast.com
+    default: 10.0.5.112
   release-id:
     description: 'Name of the release (typically a date and commit hash)'
     required: false
