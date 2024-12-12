@@ -42,6 +42,10 @@ runs:
         echo "release = $release"
         echo "release=$release" >> "$GITHUB_OUTPUT"
 
+    - name: Install awsh
+      shell: bash
+      run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/warpcast/awsh/refs/heads/main/install.sh)"
+
     - name: Execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
       shell: bash
       run: |
@@ -51,7 +55,7 @@ runs:
         # -o BatchMode=yes // Disable interactivity
         # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
-        ssh -4 -T -A -o BatchMode=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
+        /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
         set -eux
 
         mkdir -p stack-projects
