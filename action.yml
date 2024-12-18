@@ -13,6 +13,9 @@ inputs:
   command:
     description: The stack command to execute ("plan" or "deploy")
     required: true
+  role:
+    description: ARN of the role to assume
+    required: true
   project:
     description: 'Project name as specified in the deploy.yml configuration'
     required: true
@@ -41,6 +44,12 @@ runs:
         fi
         echo "release = $release"
         echo "release=$release" >> "$GITHUB_OUTPUT"
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.role }}
+        aws-region: us-east-1
 
     - name: Install awsh
       shell: bash
