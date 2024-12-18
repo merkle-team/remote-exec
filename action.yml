@@ -62,6 +62,8 @@ runs:
         /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
         set -eux
         mkdir -p stack-projects/${{ inputs.project }}/${{ steps.set-release.outputs.release }}
+        EOF
+        )"
 
     - name: Copy deploy configuration
       shell: bash
