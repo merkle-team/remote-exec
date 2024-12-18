@@ -10,7 +10,7 @@ Allows us to reuse this logic across all applications we deploy via [Stack](http
 - `docker-image` **(required)** Full URL to the Docker image to pull on deployed instances
 - `command` **(required)** one of `deploy` or `plan`
 - `project` **(required)** the project name as specified in the `deploy.yml` configuration
-- `ssh-key` **(required)** private SSH key to use to connect to `ssh-user`@`ssh-host`
+- `role` **(required)** ARN of the role to assume in AWS (assumes you already have OIDC set up)
 - `ssh-user` _(optional)_ the user to connect to the `ssh-host` as (default `ec2-user`)
 - `ssh-host` _(optional)_ the remote host to SSH into (default `stack.warpcast.com`)
 - `release-id` _(optional)_ name of the release (default timestamp + commit hash of the form `2024-12-31T23-59-59-123Z-deadbeef`)
@@ -30,7 +30,7 @@ jobs:
           docker-image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-organization/my-repository:${{ github.sha }} # ECR repo
           command: deploy
           project: 'my-project'
-          ssh-key: ${{ secrets.STACK_DEPLOY_SSH_PRIVATE_KEY }}
+          role: arn:aws:iam::123456789012:role/my-role-that-allows-oidc-auth
 ```
 
 Notice that there's no need to clone the repo before invoking this action.
