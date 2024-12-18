@@ -77,7 +77,7 @@ runs:
     - name: Copy deploy configuration
       shell: bash
       run: |
-        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat -  | tar -xzf - stack-projects/${{ inputs.project }}/${{ steps.set-release.outputs.release }}/.stack
+        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat -  | tar -xzf - stack-projects/${{ inputs.project }}/${{ steps.set-release.outputs.release }}/.stack)"
 
     - name: Execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
       shell: bash
