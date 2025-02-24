@@ -12,7 +12,7 @@ Allows us to reuse this logic across all applications we deploy via [Stack](http
 - `project` **(required)** the project name as specified in the `deploy.yml` configuration
 - `role` **(required)** ARN of the role to assume in AWS (assumes you already have OIDC set up)
 - `ssh-user` _(optional)_ the user to connect to the `ssh-host` as (default `ec2-user`)
-- `ssh-host` _(optional)_ the remote host to SSH into (default `stack.warpcast.com`)
+- `ssh-host` _(optional)_ the remote host to SSH into
 - `release-id` _(optional)_ name of the release (default timestamp + commit hash of the form `2024-12-31T23-59-59-123Z-deadbeef`)
 
 ## How to use
