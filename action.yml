@@ -65,10 +65,6 @@ runs:
         sparse-checkout: |
           .stack
 
-    - name: Check that files are present
-      shell: bash
-      run: ls -ahl .stack
-
     - name: Prepare deploy project directory
       shell: bash
       run: |
