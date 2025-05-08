@@ -26,7 +26,7 @@ inputs:
   ssh-host:
     description: 'Hostname of the remote machine to SSH into'
     required: false
-    default: 10.0.3.156
+    default: 10.0.4.199
   release-id:
     description: 'Name of the release (typically a date and commit hash)'
     required: false
