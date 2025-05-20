@@ -65,21 +65,7 @@ runs:
         sparse-checkout: |
           .stack
 
-    - name: Prepare deploy project directory
-      shell: bash
-      run: |
-        /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
-        set -eux
-        mkdir -p stack-projects/${{ inputs.project }}
-        EOF
-        )"
-
-    - name: Copy deploy configuration
-      shell: bash
-      run: |
-        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "cat -  | tar -xzf - -C stack-projects/${{ inputs.project }} .stack"
-
-    - name: Execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
+    - name: Copy deploy configuration and execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
       shell: bash
       run: |
         # -4 // Force SSH to connect via IPV4
@@ -88,12 +74,6 @@ runs:
         # -o BatchMode=yes // Disable interactivity
         # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
-        /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
-        set -eux
-        cd stack-projects/${{ inputs.project }}
-
+        #
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
-        # Set --yes so that we don't prompt for input
-        env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack ${{ inputs.command }} --config .stack/deploy.yml --yes --release=${{ steps.set-release.outputs.release }}
-        EOF
-        )"
+        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "mkdir -p stack-projects/${{ inputs.project }} && cd stack-projects/${{ inputs.project }} && cat -  | tar -xzf - .stack && env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}"
