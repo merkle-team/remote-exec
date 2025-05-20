@@ -67,14 +67,12 @@ runs:
 
     - name: Copy deploy configuration and execute `stack ${{ inputs.command }}` on ${{ inputs.remote-host }}
       shell: bash
-      run: |
-        content=$(tar -zcf - .stack | base64)
-        # -4 // Force SSH to connect via IPV4
-        # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
-        # -A // Forward credentials to SSH agent (allows SSHing to deployed hosts)
-        # -o BatchMode=yes // Disable interactivity
-        # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
-        # -o StrictHostKeyChecking=no // Don't check against any known hosts
-        #
-        # Set CI=true to disable animations in Terraform CDK which bloat the logs
-        /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "mkdir -p stack-projects/${{ inputs.project }} && cd stack-projects/${{ inputs.project }} && echo '$content' | base64 -d | tar -xzf - .stack && env STACK_DOCKER_IMAGE='${{ inputs.docker-image }}' CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}"
+      # -4 // Force SSH to connect via IPV4
+      # -T // Disable pseudo-terminal allocation (we don't want interactive prompts)
+      # -A // Forward credentials to SSH agent (allows SSHing to deployed hosts)
+      # -o BatchMode=yes // Disable interactivity
+      # -o UserKnownHostsFile=/dev/null // Don't remember any known hosts since AWS recycles IPs often
+      # -o StrictHostKeyChecking=no // Don't check against any known hosts
+      #
+      # Set CI=true to disable animations in Terraform CDK which bloat the logs
+      run: tar -czf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "set -eux; mkdir -p stack-projects/${{ inputs.project }}; cd stack-projects/${{ inputs.project }}; cat - | base64 -d | tar -xzf - .stack; env STACK_DOCKER_IMAGE='${{ inputs.docker-image }}' CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}"
