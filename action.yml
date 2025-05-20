@@ -70,7 +70,7 @@ runs:
       run: |
         /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
         set -eux
-        mkdir -p stack-projects/${{ inputs.project }}/${{ steps.set-release.outputs.release }}
+        mkdir -p stack-projects/${{ inputs.project }}
         EOF
         )"
 
@@ -90,7 +90,7 @@ runs:
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
         /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "$(cat - <<EOF
         set -eux
-        cd stack-projects/${{ inputs.project }}/${{ steps.set-release.outputs.release }}
+        cd stack-projects/${{ inputs.project }}
 
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
         # Set --yes so that we don't prompt for input
