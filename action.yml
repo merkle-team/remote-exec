@@ -76,4 +76,4 @@ runs:
         # -o StrictHostKeyChecking=no // Don't check against any known hosts
         #
         # Set CI=true to disable animations in Terraform CDK which bloat the logs
-        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "(mkdir -p stack-projects/${{ inputs.project }}) && cd stack-projects/${{ inputs.project }} && cat -  | tar -xzf - .stack && env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}"
+        tar -zcf - .stack | /usr/local/bin/awsh -4 -T -A -oBatchMode=yes ${{ inputs.ssh-user }}@${{ inputs.ssh-host }} bash -c "mkdir -p stack-projects/${{ inputs.project }}; cd stack-projects/${{ inputs.project }}; cat - | tar -xzf - .stack ; env STACK_DOCKER_IMAGE="${{ inputs.docker-image }}" CI=true stack ${{ inputs.command }} --yes --release=${{ steps.set-release.outputs.release }}"
