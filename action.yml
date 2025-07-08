@@ -53,7 +53,7 @@ runs:
 
     - name: Install awsh
       shell: bash
-      run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/warpcast/awsh/refs/heads/main/install.sh)"
+      run: bash -c "$(curl -fsSL https://raw.githubusercontent.com/merkle-team/awsh/refs/heads/main/install.sh)"
 
     # Clone just the Stack deploy configuration.
     # We do this here instead of on the deployer since the GitHub Actions runner already has SSH permissions configured
